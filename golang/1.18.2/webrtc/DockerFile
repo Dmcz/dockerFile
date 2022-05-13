@@ -1,0 +1,5 @@
+FROM dmcz0/golang:1.18.2  
+LABEL author="dmcz"
+WORKDIR /root
+
+RUN apt-get install -y ffmpeg
