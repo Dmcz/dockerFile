@@ -1,0 +1,21 @@
+ARG UBUNTU_VERSION=22.04
+ARG PHP_VERSION=8.2
+
+FROM dmcz0/php:${PHP_VERSION}-dev-ubuntu-${UBUNTU_VERSION}
+
+ARG SWOW_VERISON=1.3.1
+
+RUN set -ex \
+    && cd /tmp \
+    && curl -SL "https://github.com/swow/swow/archive/v${SWOW_VERISON}.tar.gz" -o swow.tar.gz \
+    && mkdir -p swow \
+    && tar -xf swow.tar.gz -C swow --strip-components=1 \
+    && ( \
+        cd swow/ext \
+        && phpize \
+        && ./configure --enable-swow --enable-swow-ssl --enable-swow-curl \
+        && make -s -j$(nproc) && make install \
+    ) \
+    && echo "memory_limit=1G" > /etc/php/${PHP_VERSION}/cli/conf.d/00_default.ini \
+    && echo "opcache.enable_cli = 'On'" >> /etc/php/${PHP_VERSION}/cli/conf.d/00_opcache.ini \
+    && echo "extension=swow.so" > /etc/php/${PHP_VERSION}/cli/conf.d/50_swow.ini \

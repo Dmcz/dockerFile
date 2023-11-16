@@ -1,0 +1,37 @@
+FROM php:7.2-fpm-buster
+
+RUN set -ex \
+    && echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ buster main contrib non-free" > /etc/apt/sources.list \
+    && echo "# deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ buster main contrib non-free" >> /etc/apt/sources.list \
+    && echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ buster-updates main contrib non-free" >> /etc/apt/sources.list \
+    && echo "# deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ buster-updates main contrib non-free" >> /etc/apt/sources.list \
+    && echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list \
+    && echo "deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list \
+    && echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian-security buster/updates main contrib non-free" >> /etc/apt/sources.list \
+    && echo "deb-src https://mirrors.tuna.tsinghua.edu.cn/debian-security buster/updates main contrib non-free" >> /etc/apt/sources.list \
+    && apt-get update \
+    && apt-get install -y vim supervisor procps unar \
+    && mkdir -p /var/log/supervisor
+
+RUN apt-get install -y libmcrypt-dev \
+    && MAKEFLAGS="-j $(nproc)" pecl install mcrypt redis \
+    && docker-php-ext-enable mcrypt redis
+
+RUN  apt-get install -y libzip-dev libxml2-dev libxslt-dev \
+    && docker-php-ext-install -j$(nproc) \
+    mysqli \
+    mbstring \
+    pdo \
+    pdo_mysql \
+    xml \
+    pcntl \
+    bcmath \
+    zip \
+    sockets \
+    xsl  
+
+RUN apt-get install -y libjpeg-dev libpng-dev libgd-dev libx11-dev libxpm-dev libfreetype6-dev zlib1g-dev \
+    && docker-php-ext-configure gd --with-gd=/usr/ --with-freetype-dir=/usr/ --with-jpeg-dir=/usr/ --with-png-dir=/usr/ --with-zlib-dir=/usr/ --with-xpm-dir=/usr/ \
+    && docker-php-ext-install -j$(nproc) gd 
+
+RUN useradd -m -u 1000 deepcam

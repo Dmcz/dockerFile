@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  php-webserver:
+    image: 'dmcz0/aicraft:7.2-buster'
+    container_name: 'php-webserver'
+    networks:
+      deepcloud:
+        aliases:
+          - "php-webserver"
+    restart: always
+    user: "1000:1000"
+    volumes:
+      ## 代码目录
+      - /docker/deepcam/deepcloud-webserver/webserver_30000:/home/deepcam/applications/web/vhosts/webserver_30000
+      ## 脚本目录
+      - /docker/deepcam/deepcloud-webserver/entrypoint:/home/deepcam/applications/web/vhosts/entrypoint
+      ## 文件目录
+      - /docker/deepcam/deepcloud-webserver/download:/home/deepcam/applications/web/vhosts/download
+      ## py训练文件目录等，因为其中又软连接，所需需要容器内可以读取
+      - /opt:/opt
+      ## 工具类程序. 如 授权生成，ipkg打包
+      - /docker/deepcam/deepcloud-webserver/utils:/home/deepcam/applications/web/vhosts/utils
+    environment:
+      - TZ=Asia/Shanghai
+      - "NVIDIA_VISIBLE_DEVICES=all"
+      - "NVIDIA_DRIVER_CAPABILITIES=compute,utility"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: "nvidia"
+              count: "all"
+              capabilities: [ "gpu" ]
+
+  php-queues:
+    image: 'dmcz0/aicraft:7.2-buster'
+    container_name: 'php-queues'
+    networks:
+      deepcloud:
+        aliases:
+          - "php-queues"
+    restart: always
+    volumes:
+      ## supervisor目录
+      - /docker/deepcam/deepcloud-webserver/supervisor:/etc/supervisor/conf.d
+      ## 代码目录
+      - /docker/deepcam/deepcloud-webserver/webserver_30000:/home/deepcam/applications/web/vhosts/webserver_30000
+      ## 脚本目录
+      - /docker/deepcam/deepcloud-webserver/entrypoint:/home/deepcam/applications/web/vhosts/entrypoint
+      ## 文件目录
+      - /docker/deepcam/deepcloud-webserver/download:/home/deepcam/applications/web/vhosts/download
+      ## py训练文件目录等，因为其中又软连接，所需需要容器内可以读取
+      - /opt:/opt
+      ## 工具类程序. 如 授权生成，ipkg打包
+      - /docker/deepcam/deepcloud-webserver/utils:/home/deepcam/applications/web/vhosts/utils
+    command: [ 'supervisord', '-n' ]
+    environment:
+      - TZ=Asia/Shanghai
+      - "NVIDIA_VISIBLE_DEVICES=all"
+      - "NVIDIA_DRIVER_CAPABILITIES=compute,utility"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: "nvidia"
+              count: "all"
+              capabilities: [ "gpu" ]
+
+  php-scheduler:
+    image: 'dmcz0/aicraft:7.2-buster'
+    container_name: 'php-scheduler'
+    networks:
+      deepcloud:
+        aliases:
+          - "php-scheduler"
+    restart: always
+    user: "1000:1000"
+    volumes:
+      ## 代码目录
+      - /docker/deepcam/deepcloud-webserver/webserver_30000:/home/deepcam/applications/web/vhosts/webserver_30000
+      ## 脚本目录
+      - /docker/deepcam/deepcloud-webserver/entrypoint:/home/deepcam/applications/web/vhosts/entrypoint
+      ## 文件目录
+      - /docker/deepcam/deepcloud-webserver/download:/home/deepcam/applications/web/vhosts/download
+      ## py训练文件目录等，因为其中又软连接，所需需要容器内可以读取
+      - /opt:/opt
+      ## 工具类程序. 如 授权生成，ipkg打包
+      - /docker/deepcam/deepcloud-webserver/utils:/home/deepcam/applications/web/vhosts/utils
+    command:
+      [
+        '/home/deepcam/applications/web/vhosts/entrypoint/scheduler.sh'
+      ]
+    environment:
+      - TZ=Asia/Shanghai
+      - "NVIDIA_VISIBLE_DEVICES=all"
+      - "NVIDIA_DRIVER_CAPABILITIES=compute,utility"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: "nvidia"
+              count: "all"
+              capabilities: [ "gpu" ]
+
+networks:
+  deepcloud:
+    external: true

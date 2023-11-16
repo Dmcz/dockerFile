@@ -1,0 +1,58 @@
+ARG UBUNTU_VERSION=22.04
+
+FROM ubuntu:${UBUNTU_VERSION}
+
+LABEL maintainer="Dmcz <751662789@163.com>" version="1.0" license="MIT"
+
+ARG PHP_VERSION
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PHP_VERSION=${PHP_VERSION:-"8.1"}
+
+RUN set -ex \
+    # 换源，使用清华源
+    && cp /etc/apt/sources.list /etc/apt/sources.list_bak \
+    && echo "" > /etc/apt/sources.list \
+    && echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse" >> /etc/apt/sources.list \
+    && echo "# deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse" >> /etc/apt/sources.list \
+    && echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse" >> /etc/apt/sources.list \
+    && echo "# deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse" >> /etc/apt/sources.list \
+    && echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse" >> /etc/apt/sources.list \
+    && echo "# deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse" >> /etc/apt/sources.list \
+    && echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list \
+    && echo "# deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list \
+    && echo "# deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse" >> /etc/apt/sources.list \
+    && echo "# deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse" >> /etc/apt/sources.list \
+    && apt-get update \
+    && apt-get --no-install-recommends install -y ca-certificates tzdata g++ gcc make cmake libc-ares-dev libcurl4-openssl-dev zlib1g-dev vim wget curl tar zip git net-tools iputils-ping \
+    && ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && dpkg-reconfigure -f noninteractive tzdata \
+    # 安装php
+    && apt-get --no-install-recommends install -y \
+    php${PHP_VERSION}-cli \
+    php${PHP_VERSION}-dev \
+    php${PHP_VERSION}-common \
+    php${PHP_VERSION}-bcmath \
+    php${PHP_VERSION}-curl \
+    php${PHP_VERSION}-gd \
+    php${PHP_VERSION}-mbstring \
+    php${PHP_VERSION}-mysql \
+    php${PHP_VERSION}-phar \
+    php${PHP_VERSION}-redis \
+    php${PHP_VERSION}-zip \
+    php${PHP_VERSION}-opcache \
+    php-pear \
+    && pecl channel-update pecl.php.net \
+    # 安装 swoole
+    && MAKEFLAGS="-j $(nproc)" pecl install --configureoptions 'enable-sockets="no" enable-brotli="no" enable-openssl="yes" enable-http2="yes" enable-mysqlnd="no" enable-swoole-json="no" enable-swoole-curl="yes" enable-cares="yes"' swoole \
+    && echo "memory_limit=1G" > /etc/php/${PHP_VERSION}/cli/conf.d/00_default.ini \
+    && echo "opcache.enable_cli = 'On'" >> /etc/php/${PHP_VERSION}/cli/conf.d/10-opcache.ini \
+    && echo "extension=swoole.so" > /etc/php/${PHP_VERSION}/cli/conf.d/50_swoole.ini \
+    && echo "swoole.use_shortname = 'Off'" >> /etc/php/${PHP_VERSION}/cli/conf.d/50_swoole.ini \
+    # 安装 composer
+    && cd /tmp \
+    && curl -sS https://getcomposer.org/installer | php \
+    && mv composer.phar /usr/local/bin/composer \
+    && composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/ \
+    && apt clean \
+    && rm -rf /tmp/* 

@@ -1,0 +1,22 @@
+
+FROM dmcz0/php:8.1-dev-swoole
+
+ARG GRPC_VERSION=v1.50.1
+
+RUN set -ex \
+    && MAKEFLAGS="-j $(nproc)" pecl install grpc \
+    && echo "extension=grpc.so" > /etc/php/${PHP_VERSION}/cli/conf.d/50_grpc.ini \
+    && echo "grpc.enable_fork_support = 1" >> /etc/php/${PHP_VERSION}/cli/conf.d/50_grpc.ini \ 
+    # download & init grpc repo
+    && cd /tmp \
+    && git clone -b ${GRPC_VERSION} https://github.com/grpc/grpc \
+    && cd grpc \
+    && git submodule update --init \
+    # build & install Grpc C core library , protoc , protpc plugin
+    && mkdir -p cmake/build && cd cmake/build \
+    && cmake ../.. \
+    && make -s -j$(nproc) protoc grpc_php_plugin && make install -s -j$(nproc) protoc grpc_php_plugin \
+    # share lib
+    && ldconfig \
+    # clean
+    &&  rm -rf /tmp/*

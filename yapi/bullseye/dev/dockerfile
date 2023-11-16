@@ -1,0 +1,11 @@
+ARG NODE_VERSION=12
+
+FROM node:${NODE_VERSION}-bullseye
+
+RUN set -ex \
+    && apt update \
+    && apt-get install -y git make python2 gcc g++ openssl tar \
+    && cp /usr/bin/python2.7 /usr/bin/python \
+    && npm install webpack@^3.0.0 -g  \
+    && npm install react@^0.14.0 -g \
+    && npm install ykit@0.6.2 -g
