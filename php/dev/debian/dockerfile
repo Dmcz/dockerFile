@@ -1,0 +1,83 @@
+ARG DEBIAN_VERSION=13
+
+FROM debian:${DEBIAN_VERSION}
+
+LABEL maintainer="Dmcz <751662789@163.com>" version="1.0" license="MIT"
+
+ARG PHP_VERSION=8.4 
+ARG TZ=Asia/Shanghai
+
+ENV TZ=${TZ}
+
+RUN set -eux; \
+    apt-get update; \
+    # 必要的库
+    apt-get install -y --no-install-recommends \
+    tzdata \
+    ca-certificates \
+    curl \
+    lsb-release \
+    libcurl4-openssl-dev \
+    pkg-config \
+    libc-ares-dev \
+    g++ \
+    cpp \
+    autoconf \
+    automake \
+    make \
+    cmake \
+    libtool \
+    ; \
+    # 开发中可能会用到的库
+    apt-get install -y --no-install-recommends \
+    vim wget zip unzip git net-tools iputils-ping \
+    ; \
+    # 时区
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime; \
+    echo $TZ > /etc/timezone; \
+    # php源
+    curl -sSLo /tmp/debsuryorg-archive-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb; \
+    dpkg -i /tmp/debsuryorg-archive-keyring.deb; \
+    sh -c 'echo "deb [signed-by=/usr/share/keyrings/debsuryorg-archive-keyring.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'; \
+    apt-get update; \
+    rm -rf /tmp/*; \
+    rm -rf /var/lib/apt/lists/*;
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get --no-install-recommends install -y \
+    php${PHP_VERSION}-cli \
+    php${PHP_VERSION}-dev \
+    php${PHP_VERSION}-common \
+    php${PHP_VERSION}-bcmath \
+    php${PHP_VERSION}-curl \
+    php${PHP_VERSION}-ctype \
+    php${PHP_VERSION}-dom \
+    php${PHP_VERSION}-fileinfo \
+    php${PHP_VERSION}-gd \
+    php${PHP_VERSION}-iconv \
+    php${PHP_VERSION}-mbstring \
+    php${PHP_VERSION}-mysqlnd \
+    php${PHP_VERSION}-pdo \
+    php${PHP_VERSION}-phar \
+    php${PHP_VERSION}-posix \
+    php${PHP_VERSION}-redis \
+    php${PHP_VERSION}-sockets \
+    php${PHP_VERSION}-sysvshm \
+    php${PHP_VERSION}-sysvmsg \
+    php${PHP_VERSION}-sysvsem \
+    php${PHP_VERSION}-simplexml \
+    php${PHP_VERSION}-tokenizer \
+    php${PHP_VERSION}-zip \
+    php${PHP_VERSION}-xml \
+    php${PHP_VERSION}-xmlreader \
+    php${PHP_VERSION}-xmlwriter \
+    php${PHP_VERSION}-opcache \
+    ; \
+    ## 安装composer
+    curl -sSLo /tmp/composer-setup.php https://getcomposer.org/installer; \
+    php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer; \
+    composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/* /tmp/*
+

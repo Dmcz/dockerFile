@@ -1,0 +1,32 @@
+ARG DEBIAN_VERSION=13
+ARG PHP_VERSION=8.4
+ARG SWOOLE_VERSION=6.1.5
+
+FROM dmcz0/php:${PHP_VERSION}-dev-debian-${DEBIAN_VERSION}-swoole-${SWOOLE_VERSION}
+
+ARG PHP_VERSION
+ARG GRPC_VERSION=1.76.0
+
+RUN set -eux; \
+    cd /tmp; \
+    git clone -b "v${GRPC_VERSION}" --recurse-submodules https://github.com/grpc/grpc; \
+    cd /tmp/grpc; \
+    mkdir -p cmake/build; \
+    # protoc + grpc_php_plugin
+    cd cmake/build; \
+    cmake ../.. \
+      -DgRPC_INSTALL=ON \
+      -DgRPC_BUILD_TESTS=OFF \
+      -DBUILD_SHARED_LIBS=ON; \
+    make -j"$(nproc)" grpc protoc grpc_php_plugin; \
+    make install; \
+    ldconfig; \
+    # PHP extension
+    cd /tmp/grpc/src/php/ext/grpc; \
+    phpize; \
+    ./configure; \
+    make -j"$(nproc)"; \
+    make install; \
+    echo "extension=grpc.so" > "/etc/php/${PHP_VERSION}/cli/conf.d/50_grpc.ini"; \
+    echo "grpc.enable_fork_support = 1" >> "/etc/php/${PHP_VERSION}/cli/conf.d/50_grpc.ini"; \
+    rm -rf /tmp/*
