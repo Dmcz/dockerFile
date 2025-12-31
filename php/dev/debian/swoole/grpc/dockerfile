@@ -1,8 +1,11 @@
 ARG DEBIAN_VERSION=13
-ARG PHP_VERSION=8.4
+ARG PHP_VERSION_MAJOR=8
+ARG PHP_VERSION_MINOR=4
+ARG PHP_VERSION_PATCH=0
 ARG SWOOLE_VERSION=6.1.5
+ARG ZTS_SUFFIX=
 
-FROM dmcz0/php:${PHP_VERSION}-dev-debian-${DEBIAN_VERSION}-swoole-${SWOOLE_VERSION}
+FROM dmcz0/php:${PHP_VERSION_MAJOR}.${PHP_VERSION_MINOR}-dev-debian-${DEBIAN_VERSION}${ZTS_SUFFIX}-swoole-${SWOOLE_VERSION}
 
 ARG PHP_VERSION
 ARG GRPC_VERSION=1.76.0
@@ -27,6 +30,6 @@ RUN set -eux; \
     ./configure; \
     make -j"$(nproc)"; \
     make install; \
-    echo "extension=grpc.so" > "/etc/php/${PHP_VERSION}/cli/conf.d/50_grpc.ini"; \
-    echo "grpc.enable_fork_support = 1" >> "/etc/php/${PHP_VERSION}/cli/conf.d/50_grpc.ini"; \
+    echo "extension=grpc.so" > "/etc/php/${PHP_VERSION_SHORT}/cli/conf.d/50_grpc.ini"; \
+    echo "grpc.enable_fork_support = 1" >> "/etc/php/${PHP_VERSION_SHORT}/cli/conf.d/50_grpc.ini"; \
     rm -rf /tmp/*

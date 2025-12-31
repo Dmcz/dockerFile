@@ -4,10 +4,15 @@ FROM debian:${DEBIAN_VERSION}
 
 LABEL maintainer="Dmcz <751662789@163.com>" version="1.0" license="MIT"
 
-ARG PHP_VERSION=8.4 
+ARG PHP_VERSION_MAJOR=8
+ARG PHP_VERSION_MINOR=4
+ARG PHP_VERSION_PATCH=0
+ARG ZTS_SUFFIX=
 ARG TZ=Asia/Shanghai
 
 ENV TZ=${TZ}
+ENV PHP_VERSION=${PHP_VERSION_MAJOR}.${PHP_VERSION_MINOR}.${PHP_VERSION_PATCH}
+ENV PHP_VERSION_SHORT=${PHP_VERSION_MAJOR}.${PHP_VERSION_MINOR}
 
 RUN set -eux; \
     apt-get update; \
@@ -46,33 +51,33 @@ RUN set -eux; \
 RUN set -eux; \
     apt-get update; \
     apt-get --no-install-recommends install -y \
-    php${PHP_VERSION}-cli \
-    php${PHP_VERSION}-dev \
-    php${PHP_VERSION}-common \
-    php${PHP_VERSION}-bcmath \
-    php${PHP_VERSION}-curl \
-    php${PHP_VERSION}-ctype \
-    php${PHP_VERSION}-dom \
-    php${PHP_VERSION}-fileinfo \
-    php${PHP_VERSION}-gd \
-    php${PHP_VERSION}-iconv \
-    php${PHP_VERSION}-mbstring \
-    php${PHP_VERSION}-mysqlnd \
-    php${PHP_VERSION}-pdo \
-    php${PHP_VERSION}-phar \
-    php${PHP_VERSION}-posix \
-    php${PHP_VERSION}-redis \
-    php${PHP_VERSION}-sockets \
-    php${PHP_VERSION}-sysvshm \
-    php${PHP_VERSION}-sysvmsg \
-    php${PHP_VERSION}-sysvsem \
-    php${PHP_VERSION}-simplexml \
-    php${PHP_VERSION}-tokenizer \
-    php${PHP_VERSION}-zip \
-    php${PHP_VERSION}-xml \
-    php${PHP_VERSION}-xmlreader \
-    php${PHP_VERSION}-xmlwriter \
-    php${PHP_VERSION}-opcache \
+    php${PHP_VERSION_SHORT}-cli \
+    php${PHP_VERSION_SHORT}-dev \
+    php${PHP_VERSION_SHORT}-common \
+    php${PHP_VERSION_SHORT}-bcmath \
+    php${PHP_VERSION_SHORT}-curl \
+    php${PHP_VERSION_SHORT}-ctype \
+    php${PHP_VERSION_SHORT}-dom \
+    php${PHP_VERSION_SHORT}-fileinfo \
+    php${PHP_VERSION_SHORT}-gd \
+    php${PHP_VERSION_SHORT}-iconv \
+    php${PHP_VERSION_SHORT}-mbstring \
+    php${PHP_VERSION_SHORT}-mysqlnd \
+    php${PHP_VERSION_SHORT}-pdo \
+    php${PHP_VERSION_SHORT}-phar \
+    php${PHP_VERSION_SHORT}-posix \
+    php${PHP_VERSION_SHORT}-redis \
+    php${PHP_VERSION_SHORT}-sockets \
+    php${PHP_VERSION_SHORT}-sysvshm \
+    php${PHP_VERSION_SHORT}-sysvmsg \
+    php${PHP_VERSION_SHORT}-sysvsem \
+    php${PHP_VERSION_SHORT}-simplexml \
+    php${PHP_VERSION_SHORT}-tokenizer \
+    php${PHP_VERSION_SHORT}-zip \
+    php${PHP_VERSION_SHORT}-xml \
+    php${PHP_VERSION_SHORT}-xmlreader \
+    php${PHP_VERSION_SHORT}-xmlwriter \
+    php${PHP_VERSION_SHORT}-opcache \
     ; \
     ## 安装composer
     curl -sSLo /tmp/composer-setup.php https://getcomposer.org/installer; \
@@ -80,4 +85,3 @@ RUN set -eux; \
     composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/* /tmp/*
-

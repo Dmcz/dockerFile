@@ -1,7 +1,10 @@
 ARG DEBIAN_VERSION=13
-ARG PHP_VERSION=8.4
+ARG PHP_VERSION_MAJOR=8
+ARG PHP_VERSION_MINOR=4
+ARG PHP_VERSION_PATCH=0
+ARG ZTS_SUFFIX=
 
-FROM dmcz0/php:${PHP_VERSION}-dev-debian-${DEBIAN_VERSION}
+FROM dmcz0/php:${PHP_VERSION_MAJOR}.${PHP_VERSION_MINOR}-dev-debian-${DEBIAN_VERSION}${ZTS_SUFFIX}
 
 ARG PHP_VERSION
 ARG SWOOLE_VERSION=6.1.5
@@ -15,8 +18,8 @@ RUN set -eux; \
     phpize; \
     ./configure --enable-openssl --enable-swoole-curl --enable-cares; \
     make -s -j$(nproc) && make install; \
-    echo "memory_limit=1G" > /etc/php/${PHP_VERSION}/cli/conf.d/00_default.ini; \
-    echo "opcache.enable_cli = 'On'" >> /etc/php/${PHP_VERSION}/cli/conf.d/00_opcache.ini; \
-    echo "extension=swoole.so" > /etc/php/${PHP_VERSION}/cli/conf.d/50_swoole.ini; \
-    echo "swoole.use_shortname = 'Off'" >> /etc/php/${PHP_VERSION}/cli/conf.d/50_swoole.ini; \
+    echo "memory_limit=1G" > /etc/php/${PHP_VERSION_SHORT}/cli/conf.d/00_default.ini; \
+    echo "opcache.enable_cli = 'On'" >> /etc/php/${PHP_VERSION_SHORT}/cli/conf.d/00_opcache.ini; \
+    echo "extension=swoole.so" > /etc/php/${PHP_VERSION_SHORT}/cli/conf.d/50_swoole.ini; \
+    echo "swoole.use_shortname = 'Off'" >> /etc/php/${PHP_VERSION_SHORT}/cli/conf.d/50_swoole.ini; \
     rm -rf /tmp/* ;
