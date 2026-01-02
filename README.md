@@ -4,7 +4,7 @@
 * dmcz0/php:8.3-alpine-3.20-swoole-5.1.3
 * dmcz0/php:8.3-alpine-3.20-swoole-5.1.4  // 存在bug, hyperf max_request无法重启
 * dmcz0/php:8.3-alpine-3.20-swoole-5.1.6  // 存在bug, curl或某些请求时可能会导致worker异常退出
-* dmcz0/php:8.3-alpine-3.20-swoole-5.1.7  // 存在bug, curl或某些请求时可能会导致worker异常退出
+* dmcz0/php:8.3-alpine-3.20-swoole-5.1.7  
 ## php dev
 * dmcz0/php:8.1-dev-ubuntu-22.04
 * dmcz0/php:8.2-dev-ubuntu-22.04

@@ -1,28 +1,24 @@
-ARG DEBIAN_VERSION=13
-ARG PHP_VERSION_MAJOR=8
-ARG PHP_VERSION_MINOR=4
-ARG PHP_VERSION_PATCH=0
-ARG SWOOLE_VERSION=6.1.5
-ARG ZTS_SUFFIX=
+ARG BASE_IMAGE=dmcz0/php:8.4-dev-debian-13-swoole-6.1.5
 
-FROM dmcz0/php:${PHP_VERSION_MAJOR}.${PHP_VERSION_MINOR}-dev-debian-${DEBIAN_VERSION}${ZTS_SUFFIX}-swoole-${SWOOLE_VERSION}
+FROM ${BASE_IMAGE}
 
-ARG PHP_VERSION
 ARG GRPC_VERSION=1.76.0
 
 RUN set -eux; \
     cd /tmp; \
     git clone -b "v${GRPC_VERSION}" --recurse-submodules https://github.com/grpc/grpc; \
     cd /tmp/grpc; \
-    mkdir -p cmake/build; \
     # protoc + grpc_php_plugin
+    mkdir -p cmake/build; \
     cd cmake/build; \
     cmake ../.. \
       -DgRPC_INSTALL=ON \
       -DgRPC_BUILD_TESTS=OFF \
-      -DBUILD_SHARED_LIBS=ON; \
-    make -j"$(nproc)" grpc protoc grpc_php_plugin; \
-    make install; \
+      -DBUILD_SHARED_LIBS=ON \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX=/usr/local; \
+    cmake --build . -j"$(nproc)"; \
+    cmake --install .; \
     ldconfig; \
     # PHP extension
     cd /tmp/grpc/src/php/ext/grpc; \
