@@ -30,7 +30,7 @@ PHP_ZTS_SUFFIX =
 endif
 
 BASE_DOCKERFILE = ./dockerfile
-BASE_TAG   = dmcz0/php:$(PHP_VERSION_FULL)-dev-debian-$(DEBIAN_VERSION)$(PHP_ZTS_SUFFIX)
+BASE_TAG   = dmcz0/php-dev:$(PHP_VERSION_FULL)$(PHP_ZTS_SUFFIX)-debian-$(DEBIAN_VERSION)
 ifeq ($(SWOOLE_THREAD),1)
 SWOOLE_THREAD_SUFFIX = -thread
 else

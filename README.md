@@ -16,6 +16,7 @@
 * dmcz0/php:8.3-dev-ubuntu-24.04-swoole-5.1.2-python-3.12-phpy-1.0.4
 * dmcz0/php:8.3-dev-ubuntu-24.04-swoole-5.1.2-python-3.12-phpy-1.0.5
 * dmcz0/php:8.3-dev-ubuntu-24.04-swoole-5.1.3
+* dmcz0/php-dev:8.4.16-zts-debian-13
 
 # example of build command
 ```bash

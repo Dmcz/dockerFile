@@ -19,11 +19,11 @@ make -C php/dev/debian all \
 
 # build command example
 ```bash
-docker build . -t dmcz0/php:8.4-dev-debian-13-zts \
+docker build . -t dmcz0/php-dev:8.4.16-zts-debian-13 \
 --build-arg DEBIAN_VERSION=13 \
 --build-arg PHP_VERSION_MAJOR=8 \
 --build-arg PHP_VERSION_MINOR=4 \
---build-arg PHP_VERSION_PATCH=0 \
+--build-arg PHP_VERSION_PATCH=16 \
 --build-arg PHP_ZTS=1 \
 --build-arg HTTP_PROXY=http://192.168.3.23:7890 \
 --build-arg HTTPS_PROXY=http://192.168.3.23:7890
