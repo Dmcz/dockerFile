@@ -2,30 +2,47 @@ ARG BASE_IMAGE=dmcz0/php:8.4-dev-debian-13-swoole-6.1.5
 
 FROM ${BASE_IMAGE}
 
-ARG GRPC_VERSION=1.76.0
+ARG GRPC_VERSION
+ARG PROTOBUF_VERSION
+ARG MAKEFLAGS="-j$(nproc)"
+
+ENV MAKEFLAGS="${MAKEFLAGS}"
 
 RUN set -eux; \
     cd /tmp; \
-    git clone -b "v${GRPC_VERSION}" --recurse-submodules https://github.com/grpc/grpc; \
+    if [ -n "${GRPC_VERSION}" ]; then \
+        git clone -b "v${GRPC_VERSION}" --recurse-submodules https://github.com/grpc/grpc; \
+    else \
+        GRPC_LATEST_TAG="$(git ls-remote --tags --refs https://github.com/grpc/grpc | awk -F/ '{print $3}' | sort -V | tail -n 1)"; \
+        git clone -b "${GRPC_LATEST_TAG}" --recurse-submodules https://github.com/grpc/grpc; \
+    fi; \
     cd /tmp/grpc; \
-    # protoc + grpc_php_plugin
+    git submodule update --init; \
+    # Protoc protobuffer
     mkdir -p cmake/build; \
     cd cmake/build; \
-    cmake ../.. \
-      -DgRPC_INSTALL=ON \
-      -DgRPC_BUILD_TESTS=OFF \
-      -DBUILD_SHARED_LIBS=ON \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX=/usr/local; \
-    cmake --build . -j"$(nproc)"; \
-    cmake --install .; \
-    ldconfig; \
-    # PHP extension
-    cd /tmp/grpc/src/php/ext/grpc; \
-    phpize; \
-    ./configure; \
-    make -j"$(nproc)"; \
-    make install; \
+    cmake ../..; \
+    make protoc grpc_php_plugin; \
+    install -m 0755 third_party/protobuf/protoc /usr/local/bin/protoc; \
+    install -m 0755 grpc_php_plugin /usr/local/bin/grpc_php_plugin; \
+    rm -rf /tmp/*;
+
+# DESIGN NOTE:
+# 将工具和php扩展分开安装。原因：
+# 1. 为了保证生产和开发环境中扩展安装的一致性
+# 2. 直接编译源文件并安装扩展总有点奇怪的问题，例如： `EXTRA_DEFINES=GRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK make`  这里需要增加参数等，详情见官网
+# 所以虽然可能会需要重复下载，但整体成本并不高。
+# grpc.enable_fork_support = 1 和 grpc.poll_strategy = epoll1 必须，否则 pcntl_fork 后会卡住。然而光加这还不够，编译时还需要额外的配置，直接pecl安装更轻松。
+
+RUN set -eux; \
+    cd /tmp; \
+    # PHP Extendsion
+    if [ -n "${GRPC_VERSION}" ]; then GRPC_PKG="grpc-${GRPC_VERSION}"; else GRPC_PKG="grpc"; fi; \
+    if [ -n "${PROTOBUF_VERSION}" ]; then PROTOBUF_PKG="protobuf-${PROTOBUF_VERSION}"; else PROTOBUF_PKG="protobuf"; fi; \
+    pecl install "${GRPC_PKG}" "${PROTOBUF_PKG}"; \
     echo "extension=grpc.so" > "/etc/php/${PHP_VERSION_SHORT}/cli/conf.d/50_grpc.ini"; \
     echo "grpc.enable_fork_support = 1" >> "/etc/php/${PHP_VERSION_SHORT}/cli/conf.d/50_grpc.ini"; \
-    rm -rf /tmp/*
+    echo "grpc.poll_strategy = epoll1" >> "/etc/php/${PHP_VERSION_SHORT}/cli/conf.d/50_grpc.ini"; \
+    echo "extension=protobuf.so" >> "/etc/php/${PHP_VERSION_SHORT}/cli/conf.d/50_protobuf.ini"; \
+    rm -rf /tmp/*;
+    

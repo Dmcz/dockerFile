@@ -9,11 +9,13 @@ ARG PHP_VERSION_MINOR=4
 ARG PHP_VERSION_PATCH=0
 ARG PHP_ZTS=0
 ARG TZ=Asia/Shanghai
+ARG MAKEFLAGS="-j$(nproc)"
 
 ENV TZ=${TZ}
 ENV PHP_VERSION=${PHP_VERSION_MAJOR}.${PHP_VERSION_MINOR}.${PHP_VERSION_PATCH}
 ENV PHP_VERSION_SHORT=${PHP_VERSION_MAJOR}.${PHP_VERSION_MINOR}
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
+ENV MAKEFLAGS="${MAKEFLAGS}"
 
 RUN set -eux; \
     apt-get update; \
@@ -99,7 +101,7 @@ RUN set -eux; \
       --with-zlib \
       --with-pear \
       ; \
-    make -j"$(nproc)"; \
+    make; \
     make install; \
     mkdir -p "/etc/php/${PHP_VERSION_SHORT}/cli/conf.d"; \
     cp php.ini-production "/etc/php/${PHP_VERSION_SHORT}/cli/php.ini"; \

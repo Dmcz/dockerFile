@@ -4,6 +4,8 @@ FROM ${BASE_IMAGE}
 
 ARG SWOOLE_VERSION=6.1.5
 ARG SWOOLE_THREAD=0
+ARG MAKEFLAGS="-j$(nproc)"
+ENV MAKEFLAGS="${MAKEFLAGS}"
 
 RUN set -eux; \
     cd /tmp; \
@@ -17,7 +19,7 @@ RUN set -eux; \
         SWOOLE_CONFIGURE_ARGS="${SWOOLE_CONFIGURE_ARGS} --enable-swoole-thread"; \
     fi; \
     ./configure ${SWOOLE_CONFIGURE_ARGS}; \
-    make -s -j$(nproc) && make install; \
+    make -s && make install; \
     echo "memory_limit=1G" > /etc/php/${PHP_VERSION_SHORT}/cli/conf.d/00_default.ini; \
     echo "opcache.enable_cli = 'On'" >> /etc/php/${PHP_VERSION_SHORT}/cli/conf.d/00_opcache.ini; \
     echo "extension=swoole.so" > /etc/php/${PHP_VERSION_SHORT}/cli/conf.d/50_swoole.ini; \
