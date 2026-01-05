@@ -13,6 +13,7 @@ ARG TZ=Asia/Shanghai
 ENV TZ=${TZ}
 ENV PHP_VERSION=${PHP_VERSION_MAJOR}.${PHP_VERSION_MINOR}.${PHP_VERSION_PATCH}
 ENV PHP_VERSION_SHORT=${PHP_VERSION_MAJOR}.${PHP_VERSION_MINOR}
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 RUN set -eux; \
     apt-get update; \
@@ -44,6 +45,9 @@ RUN set -eux; \
     libjpeg-dev \
     libfreetype6-dev \
     libicu-dev \
+    libzstd-dev \
+    liblz4-dev \
+    liblzf-dev \
     ; \
     # Common tools
     apt-get install -y --no-install-recommends \
@@ -70,11 +74,11 @@ RUN set -eux; \
       ${PHP_ZTS_ARG} \
       --enable-bcmath \
       --enable-exif \
-      --enable-fpm \
       --enable-gd \
       --enable-intl \
       --enable-mbstring \
       --enable-opcache \
+      --enable-pdo \
       --enable-pcntl \
       --enable-posix \
       --enable-sockets \
@@ -107,8 +111,14 @@ RUN set -eux; \
     rm -rf /tmp/*;
 
 RUN set -eux; \
+    pecl channel-update pecl.php.net; \
+    # 先装 igbinary（redis 会用到）
+    pecl install -n igbinary; \
+    pecl install -n --configureoptions=' enable-redis-igbinary="yes" enable-redis-zstd="yes" enable-redis-lz4="yes" enable-redis-lzf="yes" ' redis; \
+    echo "extension=redis.so" > "/etc/php/${PHP_VERSION_SHORT}/cli/conf.d/redis.ini"; \
+    echo "extension=igbinary.so" > "/etc/php/${PHP_VERSION_SHORT}/cli/conf.d/igbinary.ini"; \
     # Install composer
     curl -sSLo /tmp/composer-setup.php https://getcomposer.org/installer; \
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer; \
     composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/; \
-    rm -rf /tmp/*
+    rm -rf /tmp/*;

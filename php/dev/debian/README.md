@@ -3,12 +3,13 @@
 ```bash
 make -C php/dev/debian all \
   DEBIAN_VERSION=13 \
-  PHP_VERSION=8.4.0 \
+  PHP_VERSION=8.4.16 \
   PHP_ZTS=1 \
-  SWOOLE_VERSION=1.6.5 \
+  SWOOLE_VERSION=6.1.5 \
   SWOOLE_THREAD=1 \
-  HTTP_PROXY=http://192.168.3.8:7890 \
-  HTTPS_PROXY=http://192.168.3.8:7890
+  GRPC_VERSION=1.76.0 \
+  HTTP_PROXY=http://192.168.5.2:7890 \
+  HTTPS_PROXY=http://192.168.5.2:7890
 ```
 
 # platform 说明
