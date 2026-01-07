@@ -23,8 +23,8 @@ RUN set -eux; \
     cd cmake/build; \
     cmake ../..; \
     make protoc grpc_php_plugin; \
-    install -m 0755 third_party/protobuf/protoc /usr/local/bin/protoc; \
-    install -m 0755 grpc_php_plugin /usr/local/bin/grpc_php_plugin; \
+    # 安装 protoc
+    make install; \
     rm -rf /tmp/*;
 
 # DESIGN NOTE:
@@ -44,5 +44,9 @@ RUN set -eux; \
     echo "grpc.enable_fork_support = 1" >> "/etc/php/${PHP_VERSION_SHORT}/cli/conf.d/50_grpc.ini"; \
     echo "grpc.poll_strategy = epoll1" >> "/etc/php/${PHP_VERSION_SHORT}/cli/conf.d/50_grpc.ini"; \
     echo "extension=protobuf.so" >> "/etc/php/${PHP_VERSION_SHORT}/cli/conf.d/50_protobuf.ini"; \
+    # 强校验：必须已经落到 extension_dir，有时候会莫名的失败...
+    ext_dir="$(php -r 'echo ini_get("extension_dir");')"; \
+    test -f "${ext_dir}/grpc.so"; \
+    test -f "${ext_dir}/protobuf.so"; \
     rm -rf /tmp/*;
     

@@ -42,6 +42,7 @@ RUN set -eux; \
     libonig-dev \
     libzip-dev \
     zlib1g-dev \
+    libsodium-dev \
     libreadline-dev \
     libpng-dev \
     libjpeg-dev \
@@ -97,6 +98,7 @@ RUN set -eux; \
       --with-openssl \
       --with-pdo-mysql=mysqlnd \
       --with-readline \
+      --with-sodium \
       --with-zip \
       --with-zlib \
       --with-pear \
