@@ -5,8 +5,9 @@ SWOOLE_VERSION ?= 6.1.5
 SWOOLE_THREAD  ?= 0
 GRPC_VERSION   ?=
 PROTOBUF_VERSION ?=
-# 默认同时构建 linux/amd64 和 linux/arm64 镜像。
-PLATFORMS      ?= linux/amd64,linux/arm64
+# 暂时默认单平台，因为跨平台在编译时一只存在问题，怀疑是仿真哪里有问题。
+# 如果解决掉问题后，则默认多平台：macOS(Apple Silicon) -> linux/arm64，Intel/AMD -> linux/amd64
+PLATFORMS      ?= 
 HTTP_PROXY     ?=
 HTTPS_PROXY    ?=
 COMMA          := ,
