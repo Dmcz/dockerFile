@@ -1,4 +1,7 @@
 # make example
+
+> `MAKEFLAGS` 是必填参数，必须通过命令行变量显式传入，例如 `MAKEFLAGS=-j5`。
+
 ## 推荐构建示例
 ```bash
 make -C php/dev/debian all \
@@ -38,7 +41,7 @@ make -C php/dev/debian all \
 ```
 
 # platform 说明
-- 默认不设置 `PLATFORMS`：使用 `docker build`，当前平台
+- 默认 `PLATFORMS=linux/amd64,linux/arm64`：使用 `docker buildx build` 多平台构建并 `--push`
 - 设置 `PLATFORMS=linux/amd64`：使用 `docker build` 单平台构建
 - 设置 `PLATFORMS=linux/amd64,linux/arm64`：使用 `docker buildx build` 多平台构建并 `--push`
 
@@ -61,7 +64,8 @@ docker build ./php/dev/debian -t dmcz0/php-dev:8.4.16-zts-debian-13 \
 docker build ./php/dev/debian/swoole -t dmcz0/php-dev:8.4.16-zts-debian-13-swoole-6.1.5-thread \
   --build-arg BASE_IMAGE=dmcz0/php-dev:8.4.16-zts-debian-13 \
   --build-arg SWOOLE_VERSION=6.1.5 \
-  --build-arg SWOOLE_THREAD=1 
+  --build-arg SWOOLE_THREAD=1 \
+  --build-arg MAKEFLAGS=-j16
 ```
 
 ## php/dev/debian/swoole/grpc/dockerfile
@@ -70,5 +74,6 @@ docker build ./php/dev/debian/swoole -t dmcz0/php-dev:8.4.16-zts-debian-13-swool
 docker build ./php/dev/debian/swoole/grpc -t dmcz0/php-dev:8.4.16-zts-debian-13-swoole-6.1.5-thread-grpc-1.76.0 \
   --build-arg BASE_IMAGE=dmcz0/php-dev:8.4.16-zts-debian-13-swoole-6.1.5-thread \
   --build-arg GRPC_VERSION=1.76.0 \
-  --build-arg PROTOBUF_VERSION=4.33.2
+  --build-arg PROTOBUF_VERSION=4.33.2 \
+  --build-arg MAKEFLAGS=-j16
 ```

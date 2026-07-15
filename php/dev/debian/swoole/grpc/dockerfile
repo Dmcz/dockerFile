@@ -4,11 +4,12 @@ FROM ${BASE_IMAGE}
 
 ARG GRPC_VERSION
 ARG PROTOBUF_VERSION
-ARG MAKEFLAGS="-j$(nproc)"
+ARG MAKEFLAGS
 
 ENV MAKEFLAGS="${MAKEFLAGS}"
 
 RUN set -eux; \
+    : "${MAKEFLAGS:?MAKEFLAGS build argument is required}"; \
     cd /tmp; \
     if [ -n "${GRPC_VERSION}" ]; then \
         git clone -b "v${GRPC_VERSION}" --recurse-submodules https://github.com/grpc/grpc; \

@@ -5,13 +5,18 @@ SWOOLE_VERSION ?= 6.1.5
 SWOOLE_THREAD  ?= 0
 GRPC_VERSION   ?=
 PROTOBUF_VERSION ?=
-# 暂时默认单平台，因为跨平台在编译时一只存在问题，怀疑是仿真哪里有问题。
-# 如果解决掉问题后，则默认多平台：macOS(Apple Silicon) -> linux/arm64，Intel/AMD -> linux/amd64
-PLATFORMS      ?= 
+# 默认同时构建 linux/amd64 和 linux/arm64 镜像。
+PLATFORMS      ?= linux/amd64,linux/arm64
 HTTP_PROXY     ?=
 HTTPS_PROXY    ?=
-MAKEFLAGS      ?= -j$(shell nproc)
 COMMA          := ,
+
+ifneq ($(origin MAKEFLAGS),command line)
+$(error MAKEFLAGS is required; pass it explicitly, for example MAKEFLAGS=-j5)
+endif
+ifeq ($(strip $(MAKEFLAGS)),)
+$(error MAKEFLAGS must not be empty; for example MAKEFLAGS=-j5)
+endif
 
 PHP_VERSION_MAJOR = $(word 1,$(subst ., ,$(PHP_VERSION)))
 PHP_VERSION_MINOR = $(word 2,$(subst ., ,$(PHP_VERSION)))
@@ -93,7 +98,7 @@ endif
 
 .PHONY: all base swoole swoole-grpc
 
-all: base swoole swoole-grpc
+all: swoole-grpc
 
 base:
 	$(BUILD_CMD) -f $(BASE_DOCKERFILE) -t $(BASE_TAG) \
@@ -102,7 +107,7 @@ base:
 		$(BUILD_OUTPUT) \
 		./
 
-swoole:
+swoole: base
 	$(BUILD_CMD) -t $(SWOOLE_TAG) \
 		$(BUILD_PLATFORM) \
 		$(BUILD_ARGS) \
@@ -112,7 +117,7 @@ swoole:
 		$(BUILD_OUTPUT) \
 		./swoole
 
-swoole-grpc:
+swoole-grpc: swoole
 	$(BUILD_CMD) -t $(GRPC_TAG) \
 		$(BUILD_PLATFORM) \
 		$(BUILD_ARGS) \

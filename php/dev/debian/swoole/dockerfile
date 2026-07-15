@@ -4,10 +4,11 @@ FROM ${BASE_IMAGE}
 
 ARG SWOOLE_VERSION=6.1.5
 ARG SWOOLE_THREAD=0
-ARG MAKEFLAGS="-j$(nproc)"
+ARG MAKEFLAGS
 ENV MAKEFLAGS="${MAKEFLAGS}"
 
 RUN set -eux; \
+    : "${MAKEFLAGS:?MAKEFLAGS build argument is required}"; \
     cd /tmp; \
     curl -SL "https://github.com/swoole/swoole-src/archive/v${SWOOLE_VERSION}.tar.gz" -o swoole.tar.gz; \
     mkdir -p swoole; \
