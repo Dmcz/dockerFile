@@ -3,6 +3,7 @@
 > `MAKEFLAGS` 是必填参数，必须通过命令行变量显式传入，例如 `MAKEFLAGS=-j5`。
 
 ## 推荐构建示例
+> Grpc 默认使用最新，不需要指定版本
 ```bash
 make -C php/dev/debian all \
   DEBIAN_VERSION=13 \
@@ -13,6 +14,7 @@ make -C php/dev/debian all \
   HTTPS_PROXY=http://192.168.5.2:7890 
 ```
 ## Swoole多线程
+> 2026.07.15 似乎部分 php 扩展在 ZTS 下存在问题，且 swoole 多线程还待测试
 ```bash
 make -C php/dev/debian swoole \
   DEBIAN_VERSION=13 \
